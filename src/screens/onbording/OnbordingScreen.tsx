@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,10 @@ import {
   NativeSyntheticEvent,
 } from 'react-native';
 import onboarding1 from "../../assets/images/onboarding1.png"
+import Fonts from '../../theme/fonts';
+import Colors from '../../theme/colors';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
 export const onboardingData = [
   {
     id: '1',
@@ -37,7 +41,8 @@ export const onboardingData = [
 
 const {width} = Dimensions.get('window');
 
-const OnboardingScreen = ({navigation}: any) => {
+const OnboardingScreen = () => {
+  const navigation=useNavigation<any>()
   const flatListRef = useRef<FlatList>(null);
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -58,12 +63,42 @@ const OnboardingScreen = ({navigation}: any) => {
         index: currentIndex + 1,
       });
     } else {
-      navigation.replace('Login');
+      navigation.navigate("Auth");
     }
   };
 
+  const handleSkip=()=>{
+    navigation.navigate("Auth")
+  }
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (currentIndex < onboardingData.length - 1) {
+        flatListRef.current?.scrollToIndex({
+          index: currentIndex + 1,
+          animated: true,
+        });
+      } else {
+        flatListRef.current?.scrollToIndex({
+          index: 0,
+          animated: true,
+        });
+      }
+    }, 3000); 
+  
+    return () => clearInterval(interval);
+  }, [currentIndex]);
+
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <View>
+         <TouchableOpacity
+          onPress={handleSkip}
+          style={styles.skipConatiner}
+         >
+          <Text style={styles.skipText}>Skip</Text>
+         </TouchableOpacity>
+      </View>
       <FlatList
         ref={flatListRef}
         data={onboardingData}
@@ -87,7 +122,6 @@ const OnboardingScreen = ({navigation}: any) => {
         )}
       />
 
-      {/* Pagination */}
 
       <View style={styles.pagination}>
         {onboardingData.map((_, index) => (
@@ -112,7 +146,7 @@ const OnboardingScreen = ({navigation}: any) => {
             : 'Next'}
         </Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -121,14 +155,15 @@ export default OnboardingScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: Colors.background,
+    // paddingHorizontal:24,
   },
 
   page: {
     width,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 30,
+    paddingHorizontal:24,
   },
 
   image: {
@@ -138,20 +173,21 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 28,
-    fontWeight: '700',
+    fontSize: 24,
+    fontFamily: Fonts.semiBold,
     textAlign: 'center',
     marginTop: 20,
-    color: '#111827',
+    color: Colors.text,
   },
 
   description: {
     fontSize: 16,
-    color: '#6B7280',
+    fontFamily: Fonts.regular,
+    color: Colors.textSecondary,
     textAlign: 'center',
     lineHeight: 24,
     marginTop: 12,
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
   },
 
   pagination: {
@@ -164,17 +200,17 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: '#D1D5DB',
+    backgroundColor: Colors.grey300,
     marginHorizontal: 4,
   },
 
   activeDot: {
     width: 24,
-    backgroundColor: '#FF4458',
+    backgroundColor: Colors.primary,
   },
 
   button: {
-    backgroundColor: '#FF4458',
+    backgroundColor: Colors.primary,
     marginHorizontal: 24,
     marginVertical: 30,
     paddingVertical: 16,
@@ -183,8 +219,19 @@ const styles = StyleSheet.create({
   },
 
   buttonText: {
-    color: '#fff',
-    fontWeight: '600',
+    color: Colors.white,
     fontSize: 18,
+    fontFamily: Fonts.semiBold,
   },
+  skipConatiner:{
+    alignItems:"flex-end",
+    paddingHorizontal:24,
+  },
+   skipText:{
+     color:Colors.text,
+     fontSize:18,
+     marginVertical:16,
+     fontFamily:Fonts.medium
+   }
+ 
 });

@@ -24,9 +24,14 @@ const SignupScreen = () => {
     setFormData({ ...formData, [type]: value });
   };
 
+
+
+
+  
+
   return (
     <SafeAreaView style={styles.container}>
-      <TouchableOpacity>
+      <TouchableOpacity activeOpacity={1} onPress={()=>navigation.goBack()}>
         <ArrowLeft size={24} color={Colors.text} />
       </TouchableOpacity>
       <View style={styles.header}>

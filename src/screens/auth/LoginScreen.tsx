@@ -22,11 +22,6 @@ const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [secureText, setSecureText] = useState(true);
-
-
-
-
-
   return (
     <SafeAreaView style={styles.container}>
       <TouchableOpacity onPress={()=>navigation.goBack()} style={styles.backButton}>
@@ -111,7 +106,7 @@ const LoginScreen = () => {
       <View style={styles.bottom}>
         <Text style={styles.bottomText}>New here? </Text>
 
-        <TouchableOpacity>
+        <TouchableOpacity activeOpacity={1} onPress={()=>navigation.navigate("Signup")}>
           <Text style={styles.signUp}>Sign up</Text>
         </TouchableOpacity>
       </View>

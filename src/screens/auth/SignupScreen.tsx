@@ -12,8 +12,14 @@ import Colors from '../../theme/colors';
 import Fonts from '../../theme/fonts';
 import { useNavigation } from '@react-navigation/native';
 const SignupScreen = () => {
-  const navigation=useNavigation<any>()
+  const navigation = useNavigation<any>();
   const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+  });
+  const [errors, setErrors] = useState<any>({
     firstName: '',
     lastName: '',
     email: '',
@@ -24,14 +30,42 @@ const SignupScreen = () => {
     setFormData({ ...formData, [type]: value });
   };
 
+  const isValidate = () => {
+    let newError: any = {};
+    if (!formData?.firstName?.trim()) {
+      newError.firstName = 'First name is required';
+    }
+    if (!formData?.email?.trim()) {
+      newError.email = 'email is required';
+    } else if (
+      !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(formData.email)
+    ) {
+      newError.email = 'email is not valid';
+    }
+    if (formData?.password.trim()) {
+      newError.password = 'password is required';
+    }
 
+    setErrors(newError);
 
+    return Object.keys(newError).length === 0;
+  };
 
-  
+  const handleSignup = async () => {
+    if (!isValidate()) return;
+    try {
+    } catch (error) {}
+  };
+
+  const isFormValid =
+    formData?.firstName.trim() &&
+    formData?.email.trim() &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) &&
+    formData?.password.trim();
 
   return (
     <SafeAreaView style={styles.container}>
-      <TouchableOpacity activeOpacity={1} onPress={()=>navigation.goBack()}>
+      <TouchableOpacity activeOpacity={1} onPress={() => navigation.goBack()}>
         <ArrowLeft size={24} color={Colors.text} />
       </TouchableOpacity>
       <View style={styles.header}>
@@ -78,38 +112,46 @@ const SignupScreen = () => {
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Password</Text>
         <View style={styles.passwordBox}>
-        <TextInput
-          style={styles.passwordInput}
-          placeholder="Enter your password"
-          placeholderTextColor={Colors.textLight}
-          secureTextEntry={secureText}
-          value={formData.password}
-          onChangeText={value => handleOnChanged(value, 'password')}
-        />
+          <TextInput
+            style={styles.passwordInput}
+            placeholder="Enter your password"
+            placeholderTextColor={Colors.textLight}
+            secureTextEntry={secureText}
+            value={formData.password}
+            onChangeText={value => handleOnChanged(value, 'password')}
+          />
 
-        <TouchableOpacity onPress={() => setSecureText(!secureText)}>
-          {secureText ? (
-            <Eye size={22} color={Colors.textSecondary} />
-          ) : (
-            <EyeOff size={22} color={Colors.textSecondary} />
-          )}
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity onPress={() => setSecureText(!secureText)}>
+            {secureText ? (
+              <Eye size={22} color={Colors.textSecondary} />
+            ) : (
+              <EyeOff size={22} color={Colors.textSecondary} />
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
 
-      <TouchableOpacity style={styles.signupButton}>
-        <Text style={styles.signupText}>Login</Text>
+      <TouchableOpacity
+        activeOpacity={1}
+        disabled={!isFormValid}
+        style={[
+          styles.signupButton,
+          !isFormValid && { backgroundColor: Colors.grey300 },
+        ]}
+      >
+        <Text style={styles.signupText}>Signup</Text>
       </TouchableOpacity>
 
       <View style={styles.bottom}>
         <Text style={styles.bottomText}>Already have account? </Text>
 
-        <TouchableOpacity activeOpacity={1} onPress={()=>navigation.navigate("Login")}>
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={() => navigation.navigate('Login')}
+        >
           <Text style={styles.login}>Login</Text>
         </TouchableOpacity>
       </View>
-
-     
     </SafeAreaView>
   );
 };

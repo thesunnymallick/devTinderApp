@@ -11,7 +11,12 @@ import { ArrowLeft, Eye, EyeOff } from 'lucide-react-native';
 import Colors from '../../theme/colors';
 import Fonts from '../../theme/fonts';
 import { useNavigation } from '@react-navigation/native';
+import { signupAPI } from '../../services/authServices';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 const SignupScreen = () => {
+  const insets = useSafeAreaInsets();
   const navigation = useNavigation<any>();
   const [formData, setFormData] = useState({
     firstName: '',
@@ -26,9 +31,12 @@ const SignupScreen = () => {
     password: '',
   });
   const [secureText, setSecureText] = useState(true);
+  const [isLoading, setIsLoading]=useState(false);
   const handleOnChanged = (value: string, type: string) => {
     setFormData({ ...formData, [type]: value });
   };
+
+  
 
   const isValidate = () => {
     let newError: any = {};
@@ -42,7 +50,7 @@ const SignupScreen = () => {
     ) {
       newError.email = 'email is not valid';
     }
-    if (formData?.password.trim()) {
+    if (!formData?.password.trim()) {
       newError.password = 'password is required';
     }
 
@@ -52,9 +60,23 @@ const SignupScreen = () => {
   };
 
   const handleSignup = async () => {
+    setIsLoading(true);
     if (!isValidate()) return;
     try {
-    } catch (error) {}
+      const payload = {
+        firstName: formData?.firstName,
+        lastName: formData?.lastName,
+        emailId: formData?.email,
+        password: formData?.password,
+      };
+      const responces = await signupAPI(payload);
+
+    } catch (error) {
+      console.log(error)
+    }
+    finally{
+      setIsLoading(false);
+    }
   };
 
   const isFormValid =
@@ -65,7 +87,19 @@ const SignupScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <TouchableOpacity activeOpacity={1} onPress={() => navigation.goBack()}>
+      <KeyboardAwareScrollView
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        enableOnAndroid
+        extraScrollHeight={30}
+        contentContainerStyle={{
+          flexGrow: 1,
+          // paddingBottom: 24,
+          paddingBottom: 180,
+        }}
+      >
+       <View style={{paddingHorizontal:24,}}>
+       <TouchableOpacity activeOpacity={1} onPress={() => navigation.goBack()}>
         <ArrowLeft size={24} color={Colors.text} />
       </TouchableOpacity>
       <View style={styles.header}>
@@ -80,9 +114,12 @@ const SignupScreen = () => {
           placeholderTextColor={Colors.textLight}
           value={formData.firstName}
           onChangeText={value => handleOnChanged(value, 'firstName')}
-          style={styles.input}
+          style={[styles.input, errors.firstName && { borderColor: 'red' }]}
           keyboardType="default"
         />
+        {errors.firstName && (
+          <Text style={styles.errorText}>{errors.firstName}</Text>
+        )}
       </View>
 
       <View style={styles.inputContainer}>
@@ -92,9 +129,12 @@ const SignupScreen = () => {
           placeholderTextColor={Colors.textLight}
           value={formData.lastName}
           onChangeText={value => handleOnChanged(value, 'lastName')}
-          style={styles.input}
+          style={[styles.input, errors.lastName && { borderColor: 'red' }]}
           keyboardType="default"
         />
+        {errors.lastName && (
+          <Text style={styles.errorText}>{errors.lastName}</Text>
+        )}
       </View>
 
       <View style={styles.inputContainer}>
@@ -104,21 +144,26 @@ const SignupScreen = () => {
           placeholderTextColor={Colors.textLight}
           value={formData.email}
           onChangeText={value => handleOnChanged(value, 'email')}
-          style={styles.input}
+          style={[styles.input, errors.email && { borderColor: 'red' }]}
           keyboardType="email-address"
         />
+        {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
       </View>
 
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Password</Text>
         <View style={styles.passwordBox}>
           <TextInput
-            style={styles.passwordInput}
+            style={[
+              styles.passwordInput,
+              errors.password && { borderColor: 'red' },
+            ]}
             placeholder="Enter your password"
             placeholderTextColor={Colors.textLight}
             secureTextEntry={secureText}
             value={formData.password}
             onChangeText={value => handleOnChanged(value, 'password')}
+            keyboardType='default'
           />
 
           <TouchableOpacity onPress={() => setSecureText(!secureText)}>
@@ -129,17 +174,24 @@ const SignupScreen = () => {
             )}
           </TouchableOpacity>
         </View>
+        {errors.password && (
+          <Text style={styles.errorText}>{errors.password}</Text>
+        )}
       </View>
-
+       </View>
+      <View style={[styles.bottomSheet,    { paddingBottom: insets.bottom + 10 },]}>
       <TouchableOpacity
         activeOpacity={1}
-        disabled={!isFormValid}
+        disabled={!isFormValid }
+        onPress={handleSignup}
         style={[
           styles.signupButton,
           !isFormValid && { backgroundColor: Colors.grey300 },
         ]}
       >
-        <Text style={styles.signupText}>Signup</Text>
+        <Text style={styles.signupText}>
+          {isLoading ? "Loading...." :"Signup"}
+        </Text>
       </TouchableOpacity>
 
       <View style={styles.bottom}>
@@ -152,6 +204,12 @@ const SignupScreen = () => {
           <Text style={styles.login}>Login</Text>
         </TouchableOpacity>
       </View>
+        </View>
+    
+      </KeyboardAwareScrollView>
+     
+   
+    
     </SafeAreaView>
   );
 };
@@ -159,7 +217,6 @@ const SignupScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 24,
     backgroundColor: Colors.white,
   },
   backBuuton: {
@@ -180,7 +237,6 @@ const styles = StyleSheet.create({
   },
 
   subtitle: {
-    marginTop: 10,
     fontSize: 16,
     fontFamily: Fonts.regular,
     color: Colors.textSecondary,
@@ -225,6 +281,13 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.regular,
     color: Colors.text,
   },
+   
+  bottomSheet:{
+   backgroundColor:Colors.grey50,
+   paddingVertical:10,
+   paddingHorizontal:24,
+  },
+
   signupButton: {
     marginTop: 25,
     backgroundColor: Colors.primary,
@@ -240,11 +303,10 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.semiBold,
   },
   bottom: {
-    marginTop: 'auto',
-    marginBottom: 30,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop:24,
   },
 
   bottomText: {
@@ -257,6 +319,12 @@ const styles = StyleSheet.create({
     color: Colors.primary,
     fontFamily: Fonts.semiBold,
     fontSize: 16,
+  },
+
+  errorText: {
+    fontSize: 12,
+    color: 'red',
+    fontFamily: Fonts.regular,
   },
 });
 

@@ -46,14 +46,6 @@ const CommonModal = ({
           <Text style={styles.title}>{title}</Text>
 
           <Text style={styles.message}>{message}</Text>
-
-          <TouchableOpacity
-            style={styles.button}
-            activeOpacity={0.8}
-            onPress={onClose}
-          >
-            <Text style={styles.buttonText}>{buttonText}</Text>
-          </TouchableOpacity>
         </View>
       </View>
     </Modal>

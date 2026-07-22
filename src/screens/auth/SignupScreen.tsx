@@ -59,6 +59,17 @@ const SignupScreen = () => {
     return Object.keys(newError).length === 0;
   };
 
+  const handleCloseModal=()=>{
+    setTimeout(()=>{
+      setModal({
+        visible:false,
+        title: "",
+        message: "",
+        animation: null,
+      })
+    },3000)
+  }
+
   const handleSignup = async () => {
     setIsLoading(true);
     if (!isValidate()) return;
@@ -77,6 +88,18 @@ const SignupScreen = () => {
           message: 'Your account has been created successfully.',
           animation: require('../../assets/lottie/doneLottie.json'),
         });
+        handleCloseModal()
+        setTimeout(()=>{
+          navigation.navigate("Login")
+        },5000)
+    
+
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          password: '',
+        });
       }
     } catch (error) {
       console.log(error);
@@ -86,6 +109,7 @@ const SignupScreen = () => {
         message: 'Something went wrong.',
         animation: require('../../assets/lottie/errorLottie.json'),
       });
+      handleCloseModal()
     } finally {
       setIsLoading(false);
     }
@@ -201,7 +225,7 @@ const SignupScreen = () => {
         >
           <TouchableOpacity
             activeOpacity={1}
-            disabled={!isFormValid}
+            disabled={!isFormValid || isLoading}
             onPress={handleSignup}
             style={[
               styles.signupButton,
@@ -231,15 +255,7 @@ const SignupScreen = () => {
         title={modal.title}
         message={modal.message}
         animation={modal.animation}
-        buttonText="Continue"
-        onClose={() => {
-          setModal({
-            visible: false,
-            title: '',
-            message: '',
-            animation: null,
-          });
-        }}
+        onClose={handleCloseModal}
       />
     </SafeAreaView>
   );
